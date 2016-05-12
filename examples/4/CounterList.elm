@@ -4,6 +4,7 @@ import Counter
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Html.App exposing (map)
 
 
 -- MODEL
@@ -25,13 +26,13 @@ init =
 
 -- UPDATE
 
-type Action
+type Msg
     = Insert
     | Remove ID
-    | Modify ID Counter.Action
+    | Modify ID Counter.Msg
 
 
-update : Action -> Model -> Model
+update : Msg -> Model -> Model
 update action model =
   case action of
     Insert ->
@@ -45,10 +46,10 @@ update action model =
           counters = List.filter (\(counterID, _) -> counterID /= id) model.counters
       }
 
-    Modify id counterAction ->
+    Modify id counterMsg ->
       let updateCounter (counterID, counterModel) =
               if counterID == id then
-                  (counterID, Counter.update counterAction counterModel)
+                  (counterID, Counter.update counterMsg counterModel)
               else
                 (counterID, counterModel)
       in
@@ -66,9 +67,5 @@ view model =
 
 viewCounter : (ID, Counter.Model) -> Html Msg
 viewCounter (id, model) =
-  let context =
-        Counter.Context
-          (map  (Modify id))
-          (map (always (Remove id)))
-  in
-      Counter.viewWithRemoveButton context model
+  let context = Counter.Context (Modify id) (Remove id)
+  in Counter.viewWithRemoveButton context model

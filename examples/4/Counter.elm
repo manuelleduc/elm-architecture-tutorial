@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 
+
 -- MODEL
 
 type alias Model = Int
@@ -40,20 +41,20 @@ view model =
     ]
 
 
-type alias Context =
-    { actions : Msg
-    , remove : ()
+type alias Context p =
+    { msgs : Msg -> p
+    , remove : p
     }
 
 
-viewWithRemoveButton : Model -> Html Msg
-viewWithRemoveButton model =
+viewWithRemoveButton : Context p -> Model -> Html p
+viewWithRemoveButton context model =
   div []
-    [ button [ onClick Decrement ] [ text "-" ]
+    [ button [ onClick (context.msgs Decrement) ] [ text "-" ]
     , div [ countStyle ] [ text (toString model) ]
-    , button [ onClick Increment ] [ text "+" ]
+    , button [ onClick (context.msgs Increment) ] [ text "+" ]
     , div [ countStyle ] []
-    , button [ onClick () ] [ text "X" ]
+    , button [ onClick context.remove ] [ text "X" ]
     ]
 
 
