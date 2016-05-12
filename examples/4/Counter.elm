@@ -1,4 +1,4 @@
-module Counter (Model, init, Action, update, view, viewWithRemoveButton, Context) where
+module Counter exposing (Model, init, Msg, update, view, viewWithRemoveButton, Context)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -16,10 +16,10 @@ init count = count
 
 -- UPDATE
 
-type Action = Increment | Decrement
+type Msg = Increment | Decrement
 
 
-update : Action -> Model -> Model
+update : Msg -> Model -> Model
 update action model =
   case action of
     Increment ->
@@ -31,33 +31,33 @@ update action model =
 
 -- VIEW
 
-view : Signal.Address Action -> Model -> Html
-view address model =
+view : Model -> Html Msg
+view model =
   div []
-    [ button [ onClick address Decrement ] [ text "-" ]
+    [ button [ onClick Decrement ] [ text "-" ]
     , div [ countStyle ] [ text (toString model) ]
-    , button [ onClick address Increment ] [ text "+" ]
+    , button [ onClick Increment ] [ text "+" ]
     ]
 
 
 type alias Context =
-    { actions : Signal.Address Action
-    , remove : Signal.Address ()
+    { actions : Msg
+    , remove : ()
     }
 
 
-viewWithRemoveButton : Context -> Model -> Html
-viewWithRemoveButton context model =
+viewWithRemoveButton : Model -> Html Msg
+viewWithRemoveButton model =
   div []
-    [ button [ onClick context.actions Decrement ] [ text "-" ]
+    [ button [ onClick Decrement ] [ text "-" ]
     , div [ countStyle ] [ text (toString model) ]
-    , button [ onClick context.actions Increment ] [ text "+" ]
+    , button [ onClick Increment ] [ text "+" ]
     , div [ countStyle ] []
-    , button [ onClick context.remove () ] [ text "X" ]
+    , button [ onClick () ] [ text "X" ]
     ]
 
 
-countStyle : Attribute
+countStyle : Attribute a
 countStyle =
   style
     [ ("font-size", "20px")

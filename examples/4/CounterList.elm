@@ -1,4 +1,4 @@
-module CounterList where
+module CounterList exposing (..)
 
 import Counter
 import Html exposing (..)
@@ -57,18 +57,18 @@ update action model =
 
 -- VIEW
 
-view : Signal.Address Action -> Model -> Html
-view address model =
-  let insert = button [ onClick address Insert ] [ text "Add" ]
+view : Model -> Html Msg
+view model =
+  let insert = button [ onClick Insert ] [ text "Add" ]
   in
-      div [] (insert :: List.map (viewCounter address) model.counters)
+      div [] (insert :: List.map (viewCounter) model.counters)
 
 
-viewCounter : Signal.Address Action -> (ID, Counter.Model) -> Html
-viewCounter address (id, model) =
+viewCounter : (ID, Counter.Model) -> Html Msg
+viewCounter (id, model) =
   let context =
         Counter.Context
-          (Signal.forwardTo address (Modify id))
-          (Signal.forwardTo address (always (Remove id)))
+          (map  (Modify id))
+          (map (always (Remove id)))
   in
       Counter.viewWithRemoveButton context model
