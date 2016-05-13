@@ -1,8 +1,8 @@
-module RandomGifPair where
+module RandomGifPair exposing (..)
 
-import Effects exposing (Effects)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.App exposing (map)
 
 import RandomGif
 
@@ -15,28 +15,28 @@ type alias Model =
     }
 
 
-init : String -> String -> (Model, Effects Action)
+init : String -> String -> (Model, Cmd Msg)
 init leftTopic rightTopic =
   let
     (left, leftFx) = RandomGif.init leftTopic
     (right, rightFx) = RandomGif.init rightTopic
   in
     ( Model left right
-    , Effects.batch
-        [ Effects.map Left leftFx
-        , Effects.map Right rightFx
+    , Cmd.batch
+        [ Cmd.map Left leftFx
+        , Cmd.map Right rightFx
         ]
     )
 
 
 -- UPDATE
 
-type Action
-    = Left RandomGif.Action
-    | Right RandomGif.Action
+type Msg
+    = Left RandomGif.Msg
+    | Right RandomGif.Msg
 
 
-update : Action -> Model -> (Model, Effects Action)
+update : Msg -> Model -> (Model, Cmd Msg)
 update action model =
   case action of
     Left act ->
@@ -44,7 +44,7 @@ update action model =
         (left, fx) = RandomGif.update act model.left
       in
         ( Model left model.right
-        , Effects.map Left fx
+        , Cmd.map Left fx
         )
 
     Right act ->
@@ -52,15 +52,15 @@ update action model =
         (right, fx) = RandomGif.update act model.right
       in
         ( Model model.left right
-        , Effects.map Right fx
+        , Cmd.map Right fx
         )
 
 
 -- VIEW
 
-view : Signal.Address Action -> Model -> Html
-view address model =
+view : Model -> Html Msg
+view model =
   div [ style [ ("display", "flex") ] ]
-    [ RandomGif.view (Signal.forwardTo address Left) model.left
-    , RandomGif.view (Signal.forwardTo address Right) model.right
+    [ map Left (RandomGif.view model.left)
+    , map Right (RandomGif.view model.right)
     ]
