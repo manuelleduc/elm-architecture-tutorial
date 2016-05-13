@@ -1,10 +1,10 @@
 
 import Counter exposing (update, view)
-import StartApp.Simple exposing (start)
-
+import Html.App as Html
+import Html.App exposing (beginnerProgram)
 
 main =
-  start
+  beginnerProgram
     { model = 0
     , update = update
     , view = view
