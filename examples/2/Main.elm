@@ -1,10 +1,10 @@
 
 import CounterPair exposing (init, update, view)
-import StartApp.Simple exposing (start)
+import Html.App exposing (beginnerProgram)
 
 
 main =
-  start
+  beginnerProgram
     { model = init 0 0
     , update = update
     , view = view
