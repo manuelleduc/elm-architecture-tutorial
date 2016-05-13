@@ -1,25 +1,13 @@
-
-import Effects exposing (Never)
 import RandomGif exposing (init, update, view)
-import StartApp
+import Html.App as Html
 import Task
 
 
-app =
-  StartApp.start
+main =
+  Html.program
     { init = init "funny cats"
     , update = update
     , view = view
-    , inputs = []
+  --  , inputs = []
+    , subscriptions = \_ -> Sub.none
     }
-
-
-main =
-  app.html
-
-
-port tasks : Signal (Task.Task Never ())
-port tasks =
-  app.tasks
-
-

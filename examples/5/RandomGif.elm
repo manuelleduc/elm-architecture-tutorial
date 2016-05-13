@@ -1,6 +1,5 @@
-module RandomGif where
+module RandomGif exposing (..)
 
-import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
@@ -17,7 +16,7 @@ type alias Model =
     }
 
 
-init : String -> (Model, Effects Action)
+init : String -> (Model, Cmd Msg)
 init topic =
   ( Model topic "assets/waiting.gif"
   , getRandomGif topic
@@ -26,20 +25,25 @@ init topic =
 
 -- UPDATE
 
-type Action
+type Msg
     = RequestMore
-    | NewGif (Maybe String)
+    | GifFetchSucceed String
+    | GifFetchFail Http.Error
 
 
-update : Action -> Model -> (Model, Effects Action)
+update : Msg -> Model -> (Model, Cmd Msg)
 update action model =
   case action of
     RequestMore ->
       (model, getRandomGif model.topic)
 
-    NewGif maybeUrl ->
-      ( Model model.topic (Maybe.withDefault model.gifUrl maybeUrl)
-      , Effects.none
+    GifFetchSucceed url ->
+      ( Model model.topic url
+      , Cmd.none
+      )
+    GifFetchFail error ->
+      ( model -- for now if the fetch fail we just does nothing
+      , Cmd.none
       )
 
 
@@ -48,16 +52,16 @@ update action model =
 (=>) = (,)
 
 
-view : Signal.Address Action -> Model -> Html
-view address model =
+view : Model -> Html Msg
+view model =
   div [ style [ "width" => "200px" ] ]
     [ h2 [headerStyle] [text model.topic]
     , div [imgStyle model.gifUrl] []
-    , button [ onClick address RequestMore ] [ text "More Please!" ]
+    , button [ onClick RequestMore ] [ text "More Please!" ]
     ]
 
 
-headerStyle : Attribute
+headerStyle : Attribute a
 headerStyle =
   style
     [ "width" => "200px"
@@ -65,7 +69,7 @@ headerStyle =
     ]
 
 
-imgStyle : String -> Attribute
+imgStyle : String -> Attribute a
 imgStyle url =
   style
     [ "display" => "inline-block"
@@ -79,12 +83,10 @@ imgStyle url =
 
 -- EFFECTS
 
-getRandomGif : String -> Effects Action
+getRandomGif : String -> Cmd Msg
 getRandomGif topic =
-  Http.get decodeUrl (randomUrl topic)
-    |> Task.toMaybe
-    |> Task.map NewGif
-    |> Effects.task
+  Task.perform GifFetchFail GifFetchSucceed (Http.get decodeUrl (randomUrl topic))
+
 
 
 randomUrl : String -> String
